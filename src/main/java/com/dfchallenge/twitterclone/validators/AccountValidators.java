@@ -4,26 +4,26 @@ public class AccountValidators {
 
 
     public static void checkEmail(String email){
-        if(email == null || email.contains("@")){
+        if(email == null || !email.contains("@")){
             throw new IllegalArgumentException("Invalid email");
         }
     }
 
     public static void checkUsername(String username){
-        if(username == null || username.length() < 2){
+        if(username == null || username.isEmpty()){
             throw new IllegalArgumentException("Invalid username");
         }
     }
 
 
     public static void checkFName(String fName){
-        if(fName == null || fName.length() < 2){
+        if(fName == null || fName.isEmpty()){
             throw new IllegalArgumentException("Invalid fName");
         }
     }
 
     public static void checkLName(String lName){
-        if(lName == null || lName.length() < 2){
+        if(lName == null || lName.isEmpty()){
             throw new IllegalArgumentException("Invalid lName");
         }
     }
