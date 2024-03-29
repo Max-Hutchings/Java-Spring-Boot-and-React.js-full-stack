@@ -2,7 +2,7 @@ package com.dfchallenge.twitterclone.service;
 
 import com.dfchallenge.twitterclone.dao.AccountRepository;
 import com.dfchallenge.twitterclone.entity.Account;
-import com.dfchallenge.twitterclone.security.PasswordHasher;
+import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.validators.AccountValidators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

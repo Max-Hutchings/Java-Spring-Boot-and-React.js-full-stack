@@ -1,4 +1,4 @@
-package com.dfchallenge.twitterclone.security;
+package com.dfchallenge.twitterclone.security_helpers;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 

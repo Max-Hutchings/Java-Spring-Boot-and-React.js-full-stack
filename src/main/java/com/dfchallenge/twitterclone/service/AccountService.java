@@ -1,6 +1,8 @@
 package com.dfchallenge.twitterclone.service;
 
 import com.dfchallenge.twitterclone.entity.Account;
+import org.springframework.stereotype.Service;
+
 
 public interface AccountService {
 
