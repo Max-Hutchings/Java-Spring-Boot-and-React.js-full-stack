@@ -5,6 +5,7 @@ import com.dfchallenge.twitterclone.entity.Account;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.dfchallenge.twitterclone.entity.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,8 @@ public class AccountServiceTest {
     @Test
     @DisplayName("Test saving a valid account should be successful")
     public void testSaveAccount_Success() {
-        Account validAccount = new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com", "ValidPassword1!");
+        Account validAccount = new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
         when(accountRepository.save(any(Account.class))).thenReturn(validAccount);
 
         Account savedAccount = accountService.saveAccount(validAccount);
@@ -48,7 +50,7 @@ public class AccountServiceTest {
     @DisplayName("Test saving an account with an invalid email should throw IllegalArgumentException")
     public void testSaveAccount_InvalidEmail() {
         Account invalidEmailAccount = new Account( "validUsername", "FirstName", "LastName", "invalidemail.com",
-                "ValidPassword1!");
+                "ValidPassword1!", "USER");
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> accountService.saveAccount(invalidEmailAccount));
@@ -59,7 +61,8 @@ public class AccountServiceTest {
     @Test
     @DisplayName("Test saving an account with an invalid username should throw IllegalArgumentException")
     public void testSaveAccount_InvalidUsername() {
-        Account invalidUsernameAccount = new Account( "", "FirstName", "LastName", "validEmail@example.com", "ValidPassword1!");
+        Account invalidUsernameAccount = new Account( "", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
 
 
         Exception exception = assertThrows(IllegalArgumentException.class,
@@ -71,7 +74,8 @@ public class AccountServiceTest {
     @Test
     @DisplayName("Test saving an account with an invalid first name should throw IllegalArgumentException")
     public void testSaveAccount_InvalidFirstName() {
-        Account invalidFirstNameAccount = new Account( "validUsername", "", "LastName", "validEmail@example.com", "ValidPassword1!");
+        Account invalidFirstNameAccount = new Account( "validUsername", "", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> accountService.saveAccount(invalidFirstNameAccount));
@@ -82,7 +86,8 @@ public class AccountServiceTest {
     @Test
     @DisplayName("Test saving an account with an invalid last name should throw IllegalArgumentException")
     public void testSaveAccount_InvalidLastName() {
-        Account invalidLastNameAccount = new Account( "validUsername", "FirstName", "", "validEmail@example.com", "ValidPassword1!");
+        Account invalidLastNameAccount = new Account( "validUsername", "FirstName", "", "validEmail@example.com",
+                "ValidPassword1!", "USER");
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> accountService.saveAccount(invalidLastNameAccount));
@@ -94,7 +99,7 @@ public class AccountServiceTest {
     @DisplayName("Test saving an account with an invalid password should throw IllegalArgumentException")
     public void testSaveAccount_InvalidPassword() {
         Account invalidPasswordAccount = new Account( "validUsername", "FirstName", "LastName", "validEmail@example" +
-                ".com", "invalidPassword");
+                ".com", "invalidPassword", "USER");
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> accountService.saveAccount(invalidPasswordAccount));
@@ -105,7 +110,8 @@ public class AccountServiceTest {
     @Test
     @DisplayName("Test password hashing for a valid account save")
     public void testSaveAccount_PasswordHashing() {
-        Account validAccount = new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com", "ValidPassword1!");
+        Account validAccount = new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
         when(accountRepository.save(any(Account.class))).thenAnswer(i -> i.getArguments()[0]);
 
         Account savedAccount = accountService.saveAccount(validAccount);
@@ -116,12 +122,14 @@ public class AccountServiceTest {
     @Test
     @DisplayName("Should pass due to correct Id")
     public void whenAccountByIdFound_thenReturnAccount() {
-        Account mockAccount =  new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com", "ValidPassword1!");
+        Account mockAccount =  new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
         when(accountRepository.findById(1)).thenReturn(Optional.of(mockAccount));
 
-        Account found = accountService.getAccountById(1);
+        Optional<Account> found = accountService.getAccountById(1);
 
-        assertEquals(mockAccount, found);
+        assertTrue(found.isPresent());
+        assertEquals(mockAccount, found.get());
     }
 
     @Test
@@ -129,29 +137,101 @@ public class AccountServiceTest {
     public void whenAccountByIdNotFound_thenNull() {
         when(accountRepository.findById(anyInt())).thenReturn(Optional.empty());
 
-        Account found = accountService.getAccountById(1);
+        Optional<Account> found = accountService.getAccountById(1);
 
-        assertNull(found);
+        assertFalse(found.isPresent());
     }
 
     @Test
+    @DisplayName("Should get account by email")
     public void whenAccountByEmailFound_thenReturnAccount() {
-        Account mockAccount =  new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com", "ValidPassword1!");
+        Account mockAccount =  new Account( "validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
         when(accountRepository.findByEmail("example@example.com")).thenReturn(Optional.of(mockAccount));
 
-        Account found = accountService.getAccountByEmail("example@example.com");
+        Optional<Account> found = accountService.getAccountByEmail("example@example.com");
 
-        assertEquals(mockAccount, found);
+        assertTrue(found.isPresent());
+        assertEquals(mockAccount, found.get());
     }
+
+    @Test
+    @DisplayName("Should get account by email and verify username")
+    public void whenAccountByEmailFound_thenUsernameIsCorrect() {
+        Account mockAccount = new Account("validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
+        when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
+
+        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+
+        assertTrue(found.isPresent());
+        assertEquals("validUsername", found.get().getUsername());
+    }
+
+    @Test
+    @DisplayName("Should get account by email and verify first name")
+    public void whenAccountByEmailFound_thenFirstNameIsCorrect() {
+        Account mockAccount = new Account("validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
+        when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
+
+        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+
+        assertTrue(found.isPresent());
+        assertEquals("FirstName", found.get().getFName());
+    }
+
+
+    @Test
+    @DisplayName("Should get account by email and verify last name")
+    public void whenAccountByEmailFound_thenLastNameIsCorrect() {
+        Account mockAccount = new Account("validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
+        when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
+
+        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+
+        assertTrue(found.isPresent());
+        assertEquals("LastName", found.get().getLName());
+    }
+
+    @Test
+    @DisplayName("Should get account by email and verify email")
+    public void whenAccountByEmailFound_thenEmailIsCorrect() {
+        Account mockAccount = new Account("validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
+        when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
+
+        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+
+        assertTrue(found.isPresent());
+        assertEquals("validEmail@example.com", found.get().getEmail());
+    }
+
+    @Test
+    @DisplayName("Should get account by email and verify role")
+    public void whenAccountByEmailFound_thenRoleIsCorrect() {
+        Account mockAccount = new Account("validUsername", "FirstName", "LastName", "validEmail@example.com",
+                "ValidPassword1!", "USER");
+        when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
+
+        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+
+        assertTrue(found.isPresent());
+        assertEquals(Role.USER, found.get().getRole());
+    }
+
+
 
     @Test
     @DisplayName("Should fail due to email being null")
     public void whenAccountByEmailNotFound_thenNull() {
         when(accountRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        Account found = accountService.getAccountByEmail("example@example.com");
+        Optional<Account> found = accountService.getAccountByEmail("example@example.com");
 
-        assertNull(found);
+        assertFalse(found.isPresent());
+
     }
 
 

@@ -36,34 +36,23 @@ public class AccountServiceImplementation implements AccountService{
         String hashedPassword = PasswordHasher.hashPassword(plainPassword);
         account.setPassword(hashedPassword);
 
+        System.out.println(account);
+
 
         return accountRepository.save(account);
     }
 
-    @Override
-    public Optional<Account> getAccountById(int id) {
+
+    public Optional<Account> getAccountById(Integer id) {
         return accountRepository.findById(id);
     }
 
-    @Override
+
     public Optional<Account> getAccountByEmail(String email){
         return accountRepository.findByEmail(email);
     }
 
-//    @Override
-//    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-//        Optional<Account> accountOpt = accountRepository.findByEmail(email);
-//        Account account = accountOpt.orElseThrow(() -> new UsernameNotFoundException("No user found with email: " + email));
-//
-//        // You need to convert your Account entity to a Spring Security UserDetails object
-//        return new org.springframework.security.core.userdetails.User(
-//                account.getEmail(),
-//                account.getPassword(),
-//                account.isEnabled(),
-//                true, true, true,
-//                getAuthorities(account)
-//        );
-//    }
+
 
     private Collection<? extends GrantedAuthority> getAuthorities(Account account) {
         return account.getAuthorities();

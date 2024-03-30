@@ -37,7 +37,8 @@ public class JWTServices {
 
     public Integer extractAccountId(String token){
         Claims claims = extractAllClaims(token);
-        return claims.get("userId", Integer.class);
+        String accountId = claims.get("sub", String.class);
+        return Integer.parseInt(accountId);
     }
 
     private Date extractExpiration(String token){
@@ -45,16 +46,16 @@ public class JWTServices {
         return claims.getExpiration();
     }
 
-    public String generateToken(String accountId){
+    public String generateToken(Integer accountId){
         return generateToken(new HashMap<>(), accountId);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, String accountId){
+    public String generateToken(Map<String, Object> extraClaims, Integer accountId){
         final int expirationTime = 1000 * 60 * 60 * 24 * 10;
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(accountId)
+                .setSubject(Integer.toString(accountId))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

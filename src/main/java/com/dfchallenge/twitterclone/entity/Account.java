@@ -65,13 +65,28 @@ public class Account implements UserDetails{
     }
     public Account() {}
 
-    public Account(String username, String fName, String lName, String email, String password){
+    public Account(String username, String fName, String lName, String email, String password, String role){
         this.username = username;
         this.fName = fName;
         this.lName = lName;
         this.email = email;
         this.password = password;
+        setRoleFromString(role);
     }
+
+    public void setRoleFromString(String roleStr) {
+        if (roleStr != null && !roleStr.isEmpty()) {
+            try {
+                this.role = Role.valueOf(roleStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                System.out.println("Cannot match the enum");
+                throw new IllegalArgumentException("Invalid role: " + roleStr);
+            }
+        } else {
+            this.role = Role.USER;
+        }
+    }
+
 
     public String getUsername() {
         return username;
@@ -118,5 +133,21 @@ public class Account implements UserDetails{
         this.password = password;
     }
 
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", fName='" + fName + '\'' +
+                ", lName='" + lName + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                '}';
+    }
 
+
+    public Role getRole() {
+        return this.role;
+    }
 }
