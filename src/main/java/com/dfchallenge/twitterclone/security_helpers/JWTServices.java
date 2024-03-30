@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -42,6 +43,10 @@ public class JWTServices {
     private Date extractExpiration(String token){
         Claims claims = extractAllClaims(token);
         return claims.getExpiration();
+    }
+
+    public String generateToken(String accountId){
+        return generateToken(new HashMap<>(), accountId);
     }
 
     public String generateToken(Map<String, Object> extraClaims, String accountId){

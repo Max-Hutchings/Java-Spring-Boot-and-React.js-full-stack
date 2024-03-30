@@ -3,11 +3,13 @@ package com.dfchallenge.twitterclone.service;
 import com.dfchallenge.twitterclone.entity.Account;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 public interface AccountService {
 
     Account saveAccount(Account account);
-    Account getAccountById(int id);
+    Optional<Account> getAccountById(Integer id);
 
-    Account getAccountByEmail(String email);
+    Optional<Account> getAccountByEmail(String email);
 }

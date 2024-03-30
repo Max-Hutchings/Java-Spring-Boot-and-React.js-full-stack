@@ -15,12 +15,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JWTAuthenticationFilter jwtAuthFilter;
-    private final CustomAuthenticationProvider customAuthenticationProvider;
+
 
     @Autowired
-    public SecurityConfig(JWTAuthenticationFilter jwtAuthFilter, CustomAuthenticationProvider customAuthenticationProvider) {
+    public SecurityConfig(JWTAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
-        this.customAuthenticationProvider = customAuthenticationProvider;
+
     }
 
     @Bean
@@ -35,8 +35,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Add your custom filter
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Build and return the SecurityFilterChain
         return http.build();

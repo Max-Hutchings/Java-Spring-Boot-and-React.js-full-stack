@@ -1,21 +1,17 @@
 package com.dfchallenge.twitterclone.middleware;
 
-import com.dfchallenge.twitterclone.entity.Account;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
-import com.dfchallenge.twitterclone.service.AccountService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,7 +25,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private JWTServices jwtServices;
 
     @Autowired
-    private AccountService accountService;
+    private UserDetailsService userDetailsService;
 
 
     @Override
@@ -46,26 +42,16 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         accountId = jwtServices.extractAccountId(jwt);
         if (accountId != null && SecurityContextHolder.getContext().getAuthentication() == null){
 
-//            try{
-                Account account = accountService.getAccountById(accountId);
-                if (jwtServices.isTokenValid(jwt, account.getId())){
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(Integer.toString(accountId));
+                if (jwtServices.isTokenValid(jwt, accountId)){
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            account,
+                            userDetails,
                             null,
-                            account.getAuthorities()
+                            userDetails.getAuthorities()
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-//            }catch(Exception e){
-//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//
-//                response.setContentType("application/json");
-//                String jsonResponse = "{\"message\": \"Invalid authentication\"}";
-//                response.getWriter().write(jsonResponse);
-//                return;
-//            }
-
         }
         filterChain.doFilter(request, response);
     }
