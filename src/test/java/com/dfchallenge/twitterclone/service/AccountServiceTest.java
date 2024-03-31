@@ -1,11 +1,11 @@
 package com.dfchallenge.twitterclone.service;
 
 import com.dfchallenge.twitterclone.dao.AccountRepository;
-import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.entity.account.Account;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.dfchallenge.twitterclone.entity.Role;
+import com.dfchallenge.twitterclone.entity.account.Role;
 import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

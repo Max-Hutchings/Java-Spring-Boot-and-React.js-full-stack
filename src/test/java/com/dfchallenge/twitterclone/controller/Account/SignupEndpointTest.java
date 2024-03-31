@@ -1,6 +1,6 @@
 package com.dfchallenge.twitterclone.controller.Account;
 
-import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.service.AccountService;
@@ -131,7 +131,7 @@ public class SignupEndpointTest {
         mockMvc.perform(post(ENDPOINT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(jsonPath("$.authorities[0].authority").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"));
 
     }
 

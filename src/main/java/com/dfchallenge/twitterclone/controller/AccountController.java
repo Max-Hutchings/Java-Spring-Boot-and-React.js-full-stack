@@ -1,15 +1,14 @@
 package com.dfchallenge.twitterclone.controller;
 
 
-import com.dfchallenge.twitterclone.entity.Account;
-import com.dfchallenge.twitterclone.entity.AccountDTO;
+import com.dfchallenge.twitterclone.entity.account.Account;
+import com.dfchallenge.twitterclone.entity.account.AccountDTO;
 import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
 import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.service.AccountService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,6 +57,7 @@ public class AccountController {
             cookieAdder.addTokenToCookie(jwtToken, response);
 
             AccountDTO accountDTO = new AccountDTO(newAccount);
+            System.out.println(accountDTO.toString());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(accountDTO);
         }catch(Exception e){

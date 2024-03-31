@@ -1,7 +1,7 @@
 //package com.dfchallenge.twitterclone.dao;
 //import com.dfchallenge.twitterclone.dao.AccountRepository;
 //
-//import com.dfchallenge.twitterclone.entity.Account;
+//import com.dfchallenge.twitterclone.entity.account.Account;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;

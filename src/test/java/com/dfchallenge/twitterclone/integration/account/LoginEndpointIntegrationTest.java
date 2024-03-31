@@ -2,15 +2,16 @@ package com.dfchallenge.twitterclone.integration.account;
 
 
 import com.dfchallenge.twitterclone.dao.AccountRepository;
-import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.entity.account.Account;
+import com.dfchallenge.twitterclone.entity.account.Role;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.service.AccountService;
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,15 +40,20 @@ public class LoginEndpointIntegrationTest {
 
     private final String ENDPOINT_URL = "/authentication/login";
 
-    @Before
+    @BeforeEach
     public void setup() {
         try {
-            String hashedPassword = PasswordHasher.hashPassword("PassWord123##!");
-            Account account = new Account("not_quite_007", "Jason", "Bourne", "jason@gmail.com", hashedPassword, "USER");
+            Account account = new Account("not_quite_007", "Jason", "Bourne", "jason@gmail.com",
+                    "PassWord233##!", "USER");
             accountService.saveAccount(account);
         } catch (Exception e) {
             throw new RuntimeException("Failed to carry out pre-login test setup: " + e.getMessage(), e);
         }
+    }
+
+    @AfterEach
+    public void cleanup(){
+        accountRepository.deleteAll();
     }
 
     @Test
@@ -56,7 +62,7 @@ public class LoginEndpointIntegrationTest {
         String jsonRequest = """
                 {
                     "email": "jason@gmail.com",
-                    "password": "PassWord123##!"
+                    "password": "PassWord233##!"
                 }
                 """;
         ResultActions resultActions = mockMvc.perform(post(ENDPOINT_URL)
@@ -69,13 +75,13 @@ public class LoginEndpointIntegrationTest {
         System.out.println("Response: " + response.getContentAsString());
 
         resultActions
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value("best_username_ever"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("not_quite_007"))
                 .andExpect(jsonPath("$.email").value("jason@gmail.com"))
                 .andExpect(jsonPath("$.id", Matchers.anything()))
                 .andExpect(jsonPath("$.fName").value("Jason"))
-                .andExpect(jsonPath("$.lName").value("Borne"))
-                .andExpect(jsonPath("$.authorities[0].authority").value("USER"))
+                .andExpect(jsonPath("$.lName").value("Bourne"))
+                .andExpect(jsonPath("$.role").value("User"))
                 .andExpect(jsonPath("$.password").doesNotExist());
 
 

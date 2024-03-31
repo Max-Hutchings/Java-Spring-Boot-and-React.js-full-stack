@@ -1,6 +1,6 @@
 package com.dfchallenge.twitterclone.controller.Account;
 
-import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;

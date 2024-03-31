@@ -75,7 +75,7 @@ public class SignupEndpointIntegrationTest {
                 .andExpect(jsonPath("$.id", Matchers.anything()))
                 .andExpect(jsonPath("$.fName").value("Jason"))
                 .andExpect(jsonPath("$.lName").value("Borne"))
-                .andExpect(jsonPath("$.authorities[0].authority").value("USER"))
+                .andExpect(jsonPath("$.role").value("USER"))
                 .andExpect(jsonPath("$.password").doesNotExist());
 
     }

@@ -1,4 +1,4 @@
-package com.dfchallenge.twitterclone.entity;
+package com.dfchallenge.twitterclone.entity.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -36,8 +36,8 @@ public class Account implements UserDetails{
     @Column(name="password", nullable = false)
     private String password;
 
-    @Column(name="role", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name="role", nullable = false)
     private Role role;
 
     @Override

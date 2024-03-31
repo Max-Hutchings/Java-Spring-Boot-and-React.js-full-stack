@@ -1,22 +1,17 @@
 package com.dfchallenge.twitterclone.service;
 
 import com.dfchallenge.twitterclone.dao.AccountRepository;
-import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
 import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.validators.AccountValidators;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Service
