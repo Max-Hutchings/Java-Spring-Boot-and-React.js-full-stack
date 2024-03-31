@@ -6,6 +6,7 @@ import com.dfchallenge.twitterclone.entity.Account;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.dfchallenge.twitterclone.entity.Role;
+import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +53,7 @@ public class AccountServiceTest {
         Account invalidEmailAccount = new Account( "validUsername", "FirstName", "LastName", "invalidemail.com",
                 "ValidPassword1!", "USER");
 
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(InvalidAccountInputException.class,
                 () -> accountService.saveAccount(invalidEmailAccount));
         assertEquals("Invalid email", exception.getMessage());
         verify(accountRepository, never()).save(any(Account.class));
@@ -65,7 +66,7 @@ public class AccountServiceTest {
                 "ValidPassword1!", "USER");
 
 
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(InvalidAccountInputException.class,
                 () -> accountService.saveAccount(invalidUsernameAccount));
         assertEquals("Invalid username", exception.getMessage());
         verify(accountRepository, never()).save(any(Account.class));
@@ -77,7 +78,7 @@ public class AccountServiceTest {
         Account invalidFirstNameAccount = new Account( "validUsername", "", "LastName", "validEmail@example.com",
                 "ValidPassword1!", "USER");
 
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(InvalidAccountInputException.class,
                 () -> accountService.saveAccount(invalidFirstNameAccount));
         assertEquals("Invalid fName", exception.getMessage());
         verify(accountRepository, never()).save(any(Account.class));
@@ -89,7 +90,7 @@ public class AccountServiceTest {
         Account invalidLastNameAccount = new Account( "validUsername", "FirstName", "", "validEmail@example.com",
                 "ValidPassword1!", "USER");
 
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(InvalidAccountInputException.class,
                 () -> accountService.saveAccount(invalidLastNameAccount));
         assertEquals("Invalid lName", exception.getMessage());
         verify(accountRepository, never()).save(any(Account.class));
@@ -101,7 +102,7 @@ public class AccountServiceTest {
         Account invalidPasswordAccount = new Account( "validUsername", "FirstName", "LastName", "validEmail@example" +
                 ".com", "invalidPassword", "USER");
 
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(InvalidAccountInputException.class,
                 () -> accountService.saveAccount(invalidPasswordAccount));
         assertEquals("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character", exception.getMessage());
         verify(accountRepository, never()).save(any(Account.class));

@@ -7,6 +7,7 @@ import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.validators.AccountValidators;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +26,7 @@ public class AccountServiceImplementation implements AccountService{
     private AccountRepository accountRepository;
 
     @Override
-    public Account saveAccount(Account account){
+    public Account saveAccount(Account account) {
 
         try {
 //        Add check and logic before saving
@@ -34,7 +35,7 @@ public class AccountServiceImplementation implements AccountService{
             AccountValidators.checkFName(account.getFName());
             AccountValidators.checkLName(account.getLName());
             AccountValidators.checkPassword(account.getPassword());
-        }catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new InvalidAccountInputException(e.getMessage());
         }
 
@@ -47,8 +48,9 @@ public class AccountServiceImplementation implements AccountService{
 
         try {
             return accountRepository.save(account);
-        }catch(DataIntegrityViolationException error){
+        } catch (DataIntegrityViolationException error) {
             throw new AccountAlreadyExistsException();
+
         }
     }
 

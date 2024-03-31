@@ -1,7 +1,6 @@
-package com.dfchallenge.twitterclone.controller;
+package com.dfchallenge.twitterclone.controller.Account;
 
 import com.dfchallenge.twitterclone.entity.Account;
-import com.dfchallenge.twitterclone.entity.Role;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.service.AccountService;
@@ -27,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @Import(AccountService.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class AccountControllerSignupTest {
+public class SignupEndpointTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,7 +43,8 @@ public class AccountControllerSignupTest {
 
     String ENDPOINT_URL = "/authentication/create-account";
 
-    Account mockAccount = new Account("best_username_ever", "Jason", "Borne", "jason@gmail.com", "PassWord233##!", "User");
+    Account mockAccount = new Account("best_username_ever", "Jason", "Borne", "jason@gmail.com", "PassWord233##!",
+            "USER");
     String jsonRequest = """
     {
         "username": "best_username_ever",

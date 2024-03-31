@@ -53,7 +53,6 @@ public class AccountController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(bodyMessage);
             }
 
-
             String jwtToken = jwtServices.generateToken(newAccount.getId());
             cookieAdder.addTokenToCookie(jwtToken, response);
 
@@ -89,8 +88,6 @@ public class AccountController {
         cookieAdder.addTokenToCookie(jwtToken, response);
 
         return ResponseEntity.status(HttpStatus.OK).body(account);
-
-
 
 
     }

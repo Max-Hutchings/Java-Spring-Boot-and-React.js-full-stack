@@ -1,9 +1,7 @@
-package com.dfchallenge.twitterclone.integration;
+package com.dfchallenge.twitterclone.integration.account;
 
 
 import com.dfchallenge.twitterclone.dao.AccountRepository;
-import com.dfchallenge.twitterclone.entity.Account;
-import org.aspectj.lang.annotation.After;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.junit.platform.commons.logging.Logger;
@@ -11,18 +9,14 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,15 +24,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AccountControllerIntegrationTest {
+public class SignupEndpointIntegrationTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AccountControllerIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(SignupEndpointIntegrationTest.class);
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private AccountRepository accountRepository;
+
 
     @BeforeEach
     public void setup(){
@@ -132,31 +127,7 @@ public class AccountControllerIntegrationTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("Database Error - Should Return Service Unavailable")
-    public void whenDatabaseError_thenServiceUnavailable() throws Exception {
-        String jsonRequest = """
-    {
-        "username": "best_username_ever",
-        "fName": "Jason",
-        "lName": "Borne",
-        "email": "jason@gmail.com",
-        "password": "PassWord233##!",
-        "role": "USER"
-    }
-    """;
-
-        when(accountRepository.save(any(Account.class)))
-                .thenThrow(new DataIntegrityViolationException("Database Error"));
-
-        mockMvc.perform(post(ENDPOINT_URL)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isConflict());
     }
 
 
