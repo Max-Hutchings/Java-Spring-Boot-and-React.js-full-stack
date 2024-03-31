@@ -2,9 +2,12 @@ package com.dfchallenge.twitterclone.service;
 
 import com.dfchallenge.twitterclone.dao.AccountRepository;
 import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
+import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.validators.AccountValidators;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,12 +27,16 @@ public class AccountServiceImplementation implements AccountService{
     @Override
     public Account saveAccount(Account account){
 
+        try {
 //        Add check and logic before saving
-        AccountValidators.checkEmail(account.getEmail());
-        AccountValidators.checkUsername(account.getUsername());
-        AccountValidators.checkFName(account.getFName());
-        AccountValidators.checkLName(account.getLName());
-        AccountValidators.checkPassword(account.getPassword());
+            AccountValidators.checkEmail(account.getEmail());
+            AccountValidators.checkUsername(account.getUsername());
+            AccountValidators.checkFName(account.getFName());
+            AccountValidators.checkLName(account.getLName());
+            AccountValidators.checkPassword(account.getPassword());
+        }catch(IllegalArgumentException e){
+            throw new InvalidAccountInputException(e.getMessage());
+        }
 
 //        Hashing the password
         String plainPassword = account.getPassword();
@@ -38,8 +45,11 @@ public class AccountServiceImplementation implements AccountService{
 
         System.out.println(account);
 
-
-        return accountRepository.save(account);
+        try {
+            return accountRepository.save(account);
+        }catch(DataIntegrityViolationException error){
+            throw new AccountAlreadyExistsException();
+        }
     }
 
 

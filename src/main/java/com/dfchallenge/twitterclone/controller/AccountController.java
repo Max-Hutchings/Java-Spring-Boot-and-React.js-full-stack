@@ -2,6 +2,8 @@ package com.dfchallenge.twitterclone.controller;
 
 
 import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
+import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
@@ -37,14 +39,30 @@ public class AccountController {
     }
 
     @PostMapping("/create-account")
-    public ResponseEntity<Account> createUser(@RequestBody Account account, HttpServletResponse response) {
-        System.out.println(account.toString());
-        Account newAccount = accountService.saveAccount(account);
-        String jwtToken = jwtServices.generateToken(newAccount.getId());
+    public ResponseEntity<?> createUser(@RequestBody Account account, HttpServletResponse response) {
+        try {
+            System.out.println(account.toString());
+            Account newAccount;
+            try {
+                newAccount = accountService.saveAccount(account);
+            } catch (InvalidAccountInputException e) {
+                Map<String, String> bodyMessage = Map.of("message", "Failed to save account due to input", "errors", e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bodyMessage);
+            } catch(AccountAlreadyExistsException e){
+                Map<String, String> bodyMessage = Map.of("message", "Account Already Exists", "errors", e.getMessage());
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(bodyMessage);
+            }
 
-        cookieAdder.addTokenToCookie(jwtToken, response);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+            String jwtToken = jwtServices.generateToken(newAccount.getId());
+            cookieAdder.addTokenToCookie(jwtToken, response);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+        }catch(Exception e){
+            Map<String, String> bodyMessage = Map.of("message", "Failed to save account", "errors", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bodyMessage);
+        }
+
     }
 
     @PostMapping("/login")
