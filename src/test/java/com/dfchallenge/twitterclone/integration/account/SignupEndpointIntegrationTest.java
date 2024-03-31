@@ -13,10 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,7 +75,8 @@ public class SignupEndpointIntegrationTest {
                 .andExpect(jsonPath("$.id", Matchers.anything()))
                 .andExpect(jsonPath("$.fName").value("Jason"))
                 .andExpect(jsonPath("$.lName").value("Borne"))
-                .andExpect(jsonPath("$.authorities[0].authority").value("USER"));
+                .andExpect(jsonPath("$.authorities[0].authority").value("USER"))
+                .andExpect(jsonPath("$.password").doesNotExist());
 
     }
 

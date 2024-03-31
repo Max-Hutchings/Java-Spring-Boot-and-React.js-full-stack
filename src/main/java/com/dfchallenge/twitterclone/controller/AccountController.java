@@ -2,6 +2,7 @@ package com.dfchallenge.twitterclone.controller;
 
 
 import com.dfchallenge.twitterclone.entity.Account;
+import com.dfchallenge.twitterclone.entity.AccountDTO;
 import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
 import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
@@ -56,7 +57,9 @@ public class AccountController {
             String jwtToken = jwtServices.generateToken(newAccount.getId());
             cookieAdder.addTokenToCookie(jwtToken, response);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+            AccountDTO accountDTO = new AccountDTO(newAccount);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(accountDTO);
         }catch(Exception e){
             Map<String, String> bodyMessage = Map.of("message", "Failed to save account", "errors", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bodyMessage);
@@ -69,25 +72,27 @@ public class AccountController {
         String email = body.get("email");
         String password = body.get("password");
 
-        Optional<Account> account = accountService.getAccountByEmail(email);
+        Optional<Account> optionalAccount = accountService.getAccountByEmail(email);
 
-        if(!account.isPresent()){
+        if(!optionalAccount.isPresent()){
             Map<String, String> responseBody = Map.of("message", "Failed to find account");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
         }
 
-        boolean passwordsMatch = PasswordHasher.checkPassword(password, account.get().getPassword());
+        Account account = optionalAccount.get();
 
+        boolean passwordsMatch = PasswordHasher.checkPassword(password, account.getPassword());
         if (!passwordsMatch){
             Map<String, String> responseBody = Map.of("message", "Incorrect password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
         }
 
-        String jwtToken = jwtServices.generateToken(account.get().getId());
-
+        String jwtToken = jwtServices.generateToken(account.getId());
         cookieAdder.addTokenToCookie(jwtToken, response);
 
-        return ResponseEntity.status(HttpStatus.OK).body(account);
+        AccountDTO accountDTO = new AccountDTO(account);
+
+        return ResponseEntity.status(HttpStatus.OK).body(accountDTO);
 
 
     }
