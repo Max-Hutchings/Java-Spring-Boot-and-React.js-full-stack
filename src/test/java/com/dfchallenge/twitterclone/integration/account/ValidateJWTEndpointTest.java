@@ -1,14 +1,13 @@
 package com.dfchallenge.twitterclone.integration.account;
 
 
+
+import com.dfchallenge.twitterclone.controller.AccountController;
 import com.dfchallenge.twitterclone.dao.AccountRepository;
 import com.dfchallenge.twitterclone.data_generator.DataGenerator;
 import com.dfchallenge.twitterclone.entity.account.Account;
-import com.dfchallenge.twitterclone.entity.account.Role;
-import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
-import com.dfchallenge.twitterclone.service.AccountService;
+import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,39 +15,46 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockCookie;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.xml.crypto.Data;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class LoginEndpointIntegrationTest {
+public class ValidateJWTEndpointTest {
 
-    @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
     private AccountRepository accountRepository;
+    private DataGenerator dataGenerator;
+    private JWTServices jwtServices;
+
 
     @Autowired
-    private DataGenerator dataGenerator;
+    public ValidateJWTEndpointTest(MockMvc mockMvc, AccountRepository accountRepository, DataGenerator dataGenerator, JWTServices jwtServices){
+        this.mockMvc = mockMvc;
+        this.accountRepository = accountRepository;
+        this.dataGenerator = dataGenerator;
+        this.jwtServices = jwtServices;
+    }
 
-    private final String ENDPOINT_URL = "/authentication/login";
+    private final String ENDPOINT_URL = "/authentication/validate-jwt";
+
+    private Account account;
+    private String validJWT;
 
     @BeforeEach
     public void setup() {
         try {
             accountRepository.deleteAll();
-            dataGenerator.addAccountToDatabase();
+            account = dataGenerator.addAccountToDatabase();
+            validJWT = jwtServices.generateToken(account.getId());
         } catch (Exception e) {
             throw new RuntimeException("Failed to carry out pre-login test setup: " + e.getMessage(), e);
         }
@@ -60,19 +66,11 @@ public class LoginEndpointIntegrationTest {
     }
 
     @Test
-    @DisplayName("Successful login - Should return status 200 and account details")
-    public void successfulLoginTest() throws Exception{
-        String jsonRequest = """
-                {
-                    "email": "jason@gmail.com",
-                    "password": "PassWord233##!"
-                }
-                """;
-        ResultActions resultActions = mockMvc.perform(post(ENDPOINT_URL)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest));
-
+    @DisplayName("Should validate request and return user details")
+    public void successfulValidationTest() throws Exception{
+        ResultActions resultActions = mockMvc.perform(get(ENDPOINT_URL)
+                .cookie(new MockCookie("token", validJWT))
+                .with(csrf()));
 
         MockHttpServletResponse response = resultActions.andReturn().getResponse();
         System.out.println("Response: " + response.getContentAsString());
@@ -87,9 +85,35 @@ public class LoginEndpointIntegrationTest {
                 .andExpect(jsonPath("$.role").value("User"))
                 .andExpect(jsonPath("$.password").doesNotExist())
                 .andExpect(MockMvcResultMatchers.cookie().exists("token"));
-
-
-
-
     }
+
+
+    @Test
+    @DisplayName("Should return unauthorized if JWT token is expired")
+    public void jwtTokenExpiredTest() throws Exception {
+        String expiredJWT = dataGenerator.generateOutOfDateToken(account.getId()); // Implement this method to generate an expired token
+        mockMvc.perform(get(ENDPOINT_URL)
+                        .cookie(new MockCookie("token", expiredJWT)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Should return unauthorized if JWT token is invalid")
+    public void jwtTokenInvalidTest() throws Exception {
+        // This is clearly not a valid JWT as it does not have the structure header.payload.signature
+        String invalidJWT = "this.is.not.a.valid.jwt";
+
+        mockMvc.perform(get(ENDPOINT_URL)
+                        .cookie(new MockCookie("token", invalidJWT)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should return unauthorized if no JWT token is present")
+    public void noJwtTokenTest() throws Exception {
+        mockMvc.perform(get(ENDPOINT_URL))
+                .andExpect(status().isUnauthorized());
+    }
+
+
 }

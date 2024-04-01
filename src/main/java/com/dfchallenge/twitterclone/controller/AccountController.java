@@ -13,12 +13,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.Cookie;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,7 +34,7 @@ public class AccountController {
 
 
     @Autowired
-    public AccountController(AccountService accountService, JWTServices jwtServices, CookieAdder cookieAdder){
+    public AccountController(AccountService accountService, JWTServices jwtServices, CookieAdder cookieAdder) {
         this.accountService = accountService;
         this.jwtServices = jwtServices;
         this.cookieAdder = cookieAdder;
@@ -49,7 +51,7 @@ public class AccountController {
             } catch (InvalidAccountInputException e) {
                 Map<String, String> bodyMessage = Map.of("message", "Failed to save account due to input", "errors", e.getMessage());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bodyMessage);
-            } catch(AccountAlreadyExistsException e){
+            } catch (AccountAlreadyExistsException e) {
                 Map<String, String> bodyMessage = Map.of("message", "Account Already Exists", "errors", e.getMessage());
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(bodyMessage);
             }
@@ -61,7 +63,7 @@ public class AccountController {
             System.out.println(accountDTO.toString());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(accountDTO);
-        }catch(Exception e){
+        } catch (Exception e) {
             Map<String, String> bodyMessage = Map.of("message", "Failed to save account", "errors", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bodyMessage);
         }
@@ -69,13 +71,13 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> body, HttpServletResponse response){
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> body, HttpServletResponse response) {
         String email = body.get("email");
         String password = body.get("password");
 
         Optional<Account> optionalAccount = accountService.getAccountByEmail(email);
 
-        if(!optionalAccount.isPresent()){
+        if (!optionalAccount.isPresent()) {
             Map<String, String> responseBody = Map.of("message", "Failed to find account");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
         }
@@ -83,7 +85,7 @@ public class AccountController {
         Account account = optionalAccount.get();
 
         boolean passwordsMatch = PasswordHasher.checkPassword(password, account.getPassword());
-        if (!passwordsMatch){
+        if (!passwordsMatch) {
             Map<String, String> responseBody = Map.of("message", "Incorrect password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
         }
@@ -106,9 +108,34 @@ public class AccountController {
         response.addCookie(cookie);
 
         Map<String, String> responseBody = Map.of("message", "Logged out successfully");
-
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 
+    @GetMapping("/validate-jwt")
+    public ResponseEntity<?> validateJWT(HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println(authentication);
+        if (authentication != null && authentication.isAuthenticated()) {
+            System.out.println("+==++++++++");
+            Object principal = authentication.getPrincipal();
 
+            if (principal instanceof Account) {
+                Account account = (Account) principal;
+
+                String newJwt = jwtServices.generateToken(account.getId());
+                cookieAdder.addTokenToCookie(newJwt, response);
+
+                AccountDTO accountDTO = new AccountDTO(account);
+
+
+                return ResponseEntity.status(HttpStatus.OK).body(accountDTO);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("An error occurred while fetching account details.");
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
+    }
 }

@@ -19,4 +19,5 @@ public class GlobalExceptionHandler {
         Map<String, String> bodyMessage = Map.of("message", "Database error", "errors", ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bodyMessage);
     }
+
 }

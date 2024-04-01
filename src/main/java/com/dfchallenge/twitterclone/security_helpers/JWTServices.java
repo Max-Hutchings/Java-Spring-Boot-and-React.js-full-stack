@@ -27,12 +27,14 @@ public class JWTServices {
     }
 
     private Claims extractAllClaims(String token){
-        return Jwts
+
+        Claims claims = Jwts
                 .parserBuilder()
                 .setSigningKey(getSignInKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+        return claims;
     }
 
     public Integer extractAccountId(String token){
