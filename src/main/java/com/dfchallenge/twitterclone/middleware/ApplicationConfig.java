@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class ApplicationConfig {
 
+    @Autowired
     private AccountService accountService;
     private PasswordHasher passwordHasher;
 

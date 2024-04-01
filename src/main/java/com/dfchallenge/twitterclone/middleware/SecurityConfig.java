@@ -24,7 +24,6 @@ public class SecurityConfig {
     public SecurityConfig(JWTAuthenticationFilter jwtAuthFilter, AuthenticationProvider authenticationProvider) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationProvider = authenticationProvider;
-
     }
 
     @Bean
@@ -35,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/authentication/create-account").permitAll()
                         .requestMatchers("/authentication/login").permitAll()
+                        .requestMatchers("/authentication/logout").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

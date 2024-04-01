@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.Cookie;
 
 import java.util.Map;
 import java.util.Optional;
@@ -97,6 +98,17 @@ public class AccountController {
 
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", "");
+
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        Map<String, String> responseBody = Map.of("message", "Logged out successfully");
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+    }
 
 
 }

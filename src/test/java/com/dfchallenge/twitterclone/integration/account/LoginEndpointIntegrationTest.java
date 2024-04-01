@@ -2,6 +2,7 @@ package com.dfchallenge.twitterclone.integration.account;
 
 
 import com.dfchallenge.twitterclone.dao.AccountRepository;
+import com.dfchallenge.twitterclone.data_generator.DataGenerator;
 import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.entity.account.Role;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
@@ -19,6 +20,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import javax.xml.crypto.Data;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -38,14 +42,15 @@ public class LoginEndpointIntegrationTest {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private DataGenerator dataGenerator;
+
     private final String ENDPOINT_URL = "/authentication/login";
 
     @BeforeEach
     public void setup() {
         try {
-            Account account = new Account("not_quite_007", "Jason", "Bourne", "jason@gmail.com",
-                    "PassWord233##!", "USER");
-            accountService.saveAccount(account);
+            dataGenerator.addAccountToDatabase();
         } catch (Exception e) {
             throw new RuntimeException("Failed to carry out pre-login test setup: " + e.getMessage(), e);
         }
@@ -82,7 +87,8 @@ public class LoginEndpointIntegrationTest {
                 .andExpect(jsonPath("$.fName").value("Jason"))
                 .andExpect(jsonPath("$.lName").value("Bourne"))
                 .andExpect(jsonPath("$.role").value("User"))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(MockMvcResultMatchers.cookie().exists("token"));
 
 
 
