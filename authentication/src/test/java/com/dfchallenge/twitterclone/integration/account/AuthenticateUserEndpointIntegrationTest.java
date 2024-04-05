@@ -1,14 +1,9 @@
 package com.dfchallenge.twitterclone.integration.account;
 
-
 import com.dfchallenge.twitterclone.dao.AccountRepository;
 import com.dfchallenge.twitterclone.data_generator.DataGenerator;
 import com.dfchallenge.twitterclone.entity.account.Account;
-import com.dfchallenge.twitterclone.entity.account.Role;
-import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
-import com.dfchallenge.twitterclone.service.AccountService;
-import org.hamcrest.Matchers;
-import org.junit.Before;
+import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,26 +23,35 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @SpringBootTest
 @AutoConfigureMockMvc
-public class LoginEndpointIntegrationTest {
+public class AuthenticateUserEndpointIntegrationTest {
 
-    @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
     private AccountRepository accountRepository;
+    private DataGenerator dataGenerator;
+    private JWTServices jwtServices;
 
     @Autowired
-    private DataGenerator dataGenerator;
+    public AuthenticateUserEndpointIntegrationTest(MockMvc mockMvc, AccountRepository accountRepository, DataGenerator dataGenerator, JWTServices jwtServices) {
+        this.mockMvc = mockMvc;
+        this.accountRepository = accountRepository;
+        this.dataGenerator = dataGenerator;
+        this.jwtServices = jwtServices;
+    }
 
-    private final String ENDPOINT_URL = "/authentication/login";
+    private final String ENDPOINT_URL = "/authentication/authenticate-user";
+
+    private Account account;
+    private String validJWT;
 
     @BeforeEach
     public void setup() {
         try {
             accountRepository.deleteAll();
-            dataGenerator.addAccountToDatabase();
+            account = dataGenerator.addAccountToDatabase();
+            validJWT = jwtServices.generateToken(account.getId());
         } catch (Exception e) {
             throw new RuntimeException("Failed to carry out pre-login test setup: " + e.getMessage(), e);
         }
@@ -59,36 +63,29 @@ public class LoginEndpointIntegrationTest {
     }
 
     @Test
-    @DisplayName("Successful login - Should return status 200 and account details")
-    public void successfulLoginTest() throws Exception{
-        String jsonRequest = """
-                {
-                    "email": "jason@gmail.com",
-                    "password": "PassWord233##!"
-                }
-                """;
+    @DisplayName("Should return OK")
+    public void successfulValidation_CheckOk() throws Exception {
+
+        String jsonRequest = String.format("""
+    {
+        "token": "%s",
+        "accountId": "%d"
+    }
+    """, validJWT, account.getId());
+
         ResultActions resultActions = mockMvc.perform(post(ENDPOINT_URL)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest));
-
-
-        MockHttpServletResponse response = resultActions.andReturn().getResponse();
-        System.out.println("Response: " + response.getContentAsString());
+                .content(jsonRequest)
+        );
 
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("not_quite_007"))
-                .andExpect(jsonPath("$.email").value("jason@gmail.com"))
-                .andExpect(jsonPath("$.id", Matchers.anything()))
-                .andExpect(jsonPath("$.fName").value("Jason"))
-                .andExpect(jsonPath("$.lName").value("Bourne"))
-                .andExpect(jsonPath("$.role").value("User"))
-                .andExpect(jsonPath("$.password").doesNotExist())
-                .andExpect(MockMvcResultMatchers.cookie().exists("token"));
+                .andExpect(jsonPath("$.accountValidated").value(true))
+                .andExpect(jsonPath("$.accountId").value(account.getId()));
 
-
-
+        ;
 
     }
+
 }

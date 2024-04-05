@@ -112,8 +112,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         List<String> excludedPaths = List.of(
                 "/authentication/create-account",
                 "/authentication/login",
-                "/authentication/logout"
-                // Add more paths as needed
+                "/authentication/logout",
+                "/authentication/authenticate-user"
         );
 
         return excludedPaths.contains(path);

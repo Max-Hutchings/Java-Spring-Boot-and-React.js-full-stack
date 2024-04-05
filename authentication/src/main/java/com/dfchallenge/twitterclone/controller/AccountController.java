@@ -5,11 +5,14 @@ import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.entity.account.AccountDTO;
 import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
 import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
+import com.dfchallenge.twitterclone.exceptions.InvalidUserException;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.service.AccountService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -137,5 +140,31 @@ public class AccountController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
+    }
+
+    @PostMapping("/authenticate-user")
+    public ResponseEntity<?> validateUser(@RequestBody Map<String, String> body, HttpServletResponse response){
+        try {
+            System.out.println("=============== BODY =======================");
+            System.out.println(body);
+            String token = body.get("token");
+            int accountId = Integer.parseInt(body.get("accountId"));
+            System.out.println("======================================");
+            System.out.println(token);
+            System.out.println(accountId);
+
+            Integer accountIdFromToken = jwtServices.extractAccountId(token);
+            System.out.println(accountIdFromToken);
+            if ( accountIdFromToken == accountId){
+                Map<String, ?> responseMessage = Map.of("accountValidated", true, "accountId", accountIdFromToken);
+                return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+            }
+
+            throw new InvalidUserException("Account id does not match token id");
+        }catch(Exception e){
+            Map<String, ?> responseMessage = Map.of("accountValidated", false, "errors", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMessage);
+        }
+
     }
 }
