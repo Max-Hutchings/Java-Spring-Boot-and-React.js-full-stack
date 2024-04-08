@@ -114,9 +114,7 @@ public class AccountController {
     @GetMapping("/validate-jwt")
     public ResponseEntity<?> validateJWT(HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
         if (authentication != null && authentication.isAuthenticated()) {
-            System.out.println("+==++++++++");
             Object principal = authentication.getPrincipal();
 
             if (principal instanceof Account) {
