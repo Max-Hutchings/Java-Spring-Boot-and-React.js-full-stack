@@ -113,7 +113,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 "/authentication/create-account",
                 "/authentication/login",
                 "/authentication/logout",
-                "/authentication/authenticate-user"
+                "/authentication/authenticate-user",
+                "/authentication/test/get-valid-jwt"
         );
 
         return excludedPaths.contains(path);

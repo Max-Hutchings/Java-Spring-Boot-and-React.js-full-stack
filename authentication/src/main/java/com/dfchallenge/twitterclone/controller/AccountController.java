@@ -117,9 +117,7 @@ public class AccountController {
     @GetMapping("/validate-jwt")
     public ResponseEntity<?> validateJWT(HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
         if (authentication != null && authentication.isAuthenticated()) {
-            System.out.println("+==++++++++");
             Object principal = authentication.getPrincipal();
 
             if (principal instanceof Account) {
@@ -143,28 +141,37 @@ public class AccountController {
     }
 
     @PostMapping("/authenticate-user")
-    public ResponseEntity<?> validateUser(@RequestBody Map<String, String> body, HttpServletResponse response){
+    public ResponseEntity<?> validateUser(@RequestBody Map<String, String> body, HttpServletResponse response) {
         try {
-            System.out.println("=============== BODY =======================");
-            System.out.println(body);
             String token = body.get("token");
             int accountId = Integer.parseInt(body.get("accountId"));
-            System.out.println("======================================");
-            System.out.println(token);
-            System.out.println(accountId);
-
             Integer accountIdFromToken = jwtServices.extractAccountId(token);
-            System.out.println(accountIdFromToken);
-            if ( accountIdFromToken == accountId){
+            if (accountIdFromToken == accountId) {
                 Map<String, ?> responseMessage = Map.of("accountValidated", true, "accountId", accountIdFromToken);
                 return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
             }
-
             throw new InvalidUserException("Account id does not match token id");
-        }catch(Exception e){
+        } catch (Exception e) {
             Map<String, ?> responseMessage = Map.of("accountValidated", false, "errors", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMessage);
         }
+    }
+
+        @PostMapping("/test/get-valid-jwt")
+        public ResponseEntity<?> getTestJWTAndId(@RequestBody Map<String, String> body){
+            Account account;
+            try {
+                Integer accountId = Integer.valueOf(body.get("accountId"));
+                Optional<Account> tempAccount = accountService.getAccountById(accountId);
+                if(tempAccount.isPresent()){account = tempAccount.get();}
+                else{throw new IllegalArgumentException("Account not found");}
+            }catch(Exception e){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to find account with provided Id");
+            }
+
+            String token = jwtServices.generateToken(account.getId());
+            Map<String, ?> responseBody = Map.of("token", token, "accountId", account.getId());
+            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
 
     }
 }
