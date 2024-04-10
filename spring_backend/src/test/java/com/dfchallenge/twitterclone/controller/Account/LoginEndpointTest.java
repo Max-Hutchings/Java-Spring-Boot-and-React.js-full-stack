@@ -1,5 +1,6 @@
 package com.dfchallenge.twitterclone.controller.Account;
 
+import com.dfchallenge.twitterclone.controller.PostCommentController;
 import com.dfchallenge.twitterclone.controller.PostController;
 import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
@@ -30,6 +31,9 @@ public class LoginEndpointTest {
 
     @MockBean
     private PostController postController;
+
+    @MockBean
+    private PostCommentController postCommentController;
 
     @MockBean
     private JWTServices jwtServices;
