@@ -1,8 +1,10 @@
 package com.dfchallenge.twitterclone.data_generator;
 
+import com.dfchallenge.twitterclone.entity.PostComment.PostComment;
 import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.entity.post.Post;
 import com.dfchallenge.twitterclone.service.AccountService;
+import com.dfchallenge.twitterclone.service.PostCommentService;
 import com.dfchallenge.twitterclone.service.PostService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -16,7 +18,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @Component
@@ -24,14 +28,16 @@ public class DataGenerator {
 
     private final AccountService accountService;
     private final PostService postService;
+    private final PostCommentService postCommentService;
 
     @Value("${jwt.secret}")
     private String secret;
 
     @Autowired
-    public DataGenerator(AccountService accountService, PostService postService){
+    public DataGenerator(AccountService accountService, PostService postService, PostCommentService postCommentService){
         this.accountService = accountService;
         this.postService = postService;
+        this.postCommentService = postCommentService;
     }
 
     public Account addAccountToDatabase(){
@@ -61,13 +67,30 @@ public class DataGenerator {
     }
 
 
-    public void addPostsToDatabase(Account account){
-        String postContent1 = "This is a post";
-        String postContent2 = "This is another post";
-        String postContent3 = "This is yet another post";
+    public List<Post> addPostsToDatabase(Account account){
+        String[] postContents = {"This is a post", "This is another post", "This is yet another post"};
 
-        postService.savePost(new Post(postContent1, account.getId()));
-        postService.savePost(new Post(postContent2, account.getId()));
-        postService.savePost(new Post(postContent3, account.getId()));
+        List<Post> posts = new ArrayList<>();
+
+        for (String content : postContents) {
+            Post post = postService.savePost(new Post(content, account.getId()));
+            posts.add(post);
+        }
+
+        return posts;
+    }
+
+    public List<PostComment> addCommentsToDatabase(Account account, Post post){
+        String[] commentTexts = {"my first comment", "my second comment", "my third comment"};
+
+        List<PostComment> postComments = new ArrayList<>();
+
+        for(String commentText : commentTexts){
+            PostComment postComment = new PostComment(post.getId(), commentText, account.getId());
+            postComment = postCommentService.savePostComment(postComment);
+            postComments.add(postComment);
+        }
+
+        return postComments;
     }
 }
