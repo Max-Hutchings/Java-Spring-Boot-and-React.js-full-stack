@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/authentication/logout").permitAll()
                         .requestMatchers("/authentication/authenticate-user").permitAll()
                         .requestMatchers("/authentication/test/get-valid-jwt").permitAll()
+                        .requestMatchers("/post/get-all-peeps").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -157,21 +157,4 @@ public class AccountController {
         }
     }
 
-        @PostMapping("/test/get-valid-jwt")
-        public ResponseEntity<?> getTestJWTAndId(@RequestBody Map<String, String> body){
-            Account account;
-            try {
-                Integer accountId = Integer.valueOf(body.get("accountId"));
-                Optional<Account> tempAccount = accountService.getAccountById(accountId);
-                if(tempAccount.isPresent()){account = tempAccount.get();}
-                else{throw new IllegalArgumentException("Account not found");}
-            }catch(Exception e){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to find account with provided Id");
-            }
-
-            String token = jwtServices.generateToken(account.getId());
-            Map<String, ?> responseBody = Map.of("token", token, "accountId", account.getId());
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-
-    }
 }

@@ -1,7 +1,9 @@
 package com.dfchallenge.twitterclone.data_generator;
 
 import com.dfchallenge.twitterclone.entity.account.Account;
+import com.dfchallenge.twitterclone.entity.post.Post;
 import com.dfchallenge.twitterclone.service.AccountService;
+import com.dfchallenge.twitterclone.service.PostService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -21,13 +23,15 @@ import java.util.Date;
 public class DataGenerator {
 
     private final AccountService accountService;
+    private final PostService postService;
 
     @Value("${jwt.secret}")
     private String secret;
 
     @Autowired
-    public DataGenerator(AccountService accountService){
+    public DataGenerator(AccountService accountService, PostService postService){
         this.accountService = accountService;
+        this.postService = postService;
     }
 
     public Account addAccountToDatabase(){
@@ -54,5 +58,16 @@ public class DataGenerator {
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+
+    public void addPostsToDatabase(Account account){
+        String postContent1 = "This is a post";
+        String postContent2 = "This is another post";
+        String postContent3 = "This is yet another post";
+
+        postService.savePost(new Post(postContent1, account.getId()));
+        postService.savePost(new Post(postContent2, account.getId()));
+        postService.savePost(new Post(postContent3, account.getId()));
     }
 }
