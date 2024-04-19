@@ -68,7 +68,7 @@ public class GetAllPeepCommentsEndpointIntegrationTest {
             token = jwtServices.generateToken(account.getId());
             posts = dataGenerator.addPostsToDatabase(account);
             post = posts.get(0);
-            endpoint_url ="/post-comment/get-comments/" + post.getId();
+            endpoint_url ="/post-comment/peep-comments/" + post.getId();
             dataGenerator.addCommentsToDatabase(account, post);
 
             System.out.println("Setup completed successfully");

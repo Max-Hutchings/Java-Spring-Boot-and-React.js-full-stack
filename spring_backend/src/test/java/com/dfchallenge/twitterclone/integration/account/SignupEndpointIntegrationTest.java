@@ -41,7 +41,7 @@ public class SignupEndpointIntegrationTest {
         accountRepository.deleteAll();
     }
 
-    String ENDPOINT_URL = "/authentication/create-account";
+    String ENDPOINT_URL = "/authentication/sign-up";
 
 
     @Test

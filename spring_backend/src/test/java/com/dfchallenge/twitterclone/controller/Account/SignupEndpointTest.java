@@ -49,7 +49,7 @@ public class SignupEndpointTest {
     @MockBean
     private AccountService accountService;
 
-    String ENDPOINT_URL = "/authentication/create-account";
+    String ENDPOINT_URL = "/authentication/sign-up";
 
     Account mockAccount = new Account("best_username_ever", "Jason", "Borne", "jason@gmail.com", "PassWord233##!",
             "USER");

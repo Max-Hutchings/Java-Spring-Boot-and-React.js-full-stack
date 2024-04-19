@@ -110,12 +110,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private boolean isPathExcluded(String path) {
         // Define the paths to exclude
         List<String> excludedPaths = List.of(
-                "/authentication/create-account",
+                "/authentication/sign-up",
                 "/authentication/login",
                 "/authentication/logout",
                 "/authentication/authenticate-user",
                 "/authentication/test/get-valid-jwt",
-                "/post/get-all-peeps"
+                "/post/all-peeps"
         );
 
         return excludedPaths.contains(path);

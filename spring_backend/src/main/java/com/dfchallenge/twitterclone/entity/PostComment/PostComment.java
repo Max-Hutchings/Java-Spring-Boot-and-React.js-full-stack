@@ -3,6 +3,8 @@ package com.dfchallenge.twitterclone.entity.PostComment;
 
 import jakarta.persistence.*;
 
+import java.util.Date;
+
 @Entity
 @Table(name="post_comment")
 public class PostComment {
@@ -21,14 +23,26 @@ public class PostComment {
     @Column(name="account_id", nullable = false)
     private Integer accountId;
 
+    @Column(name="created_date", nullable = false)
+    private Date createdDate;
+
 
     public PostComment(Integer postId, String commentContent, Integer accountId){
         this.postId = postId;
         this.commentContent = commentContent;
         this.accountId = accountId;
+        this.createdDate = new Date();
     }
 
     public PostComment(){}
+
+    public Date getCreatedDate(){
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate){
+        this.createdDate = createdDate;
+    }
 
     public Integer getId() {
         return id;

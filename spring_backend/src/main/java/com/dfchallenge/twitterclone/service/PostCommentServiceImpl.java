@@ -2,6 +2,7 @@ package com.dfchallenge.twitterclone.service;
 
 import com.dfchallenge.twitterclone.dao.PostCommentRepository;
 import com.dfchallenge.twitterclone.entity.PostComment.PostComment;
+import com.dfchallenge.twitterclone.entity.PostComment.PostCommentDTO;
 import com.dfchallenge.twitterclone.exceptions.InvalidPostCommentInputException;
 import com.dfchallenge.twitterclone.validators.PostCommentValidators;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,10 @@ public class PostCommentServiceImpl implements PostCommentService{
     }
 
     @Override
-    public List<PostComment> getPostComments(Integer postId) {
-
-        return postCommentRepository.findAllByPostId(postId);
+    public List<PostCommentDTO> getPostComments(Integer postId) {
+        List<PostCommentDTO> list = postCommentRepository.findAllPostCommentsWithAccountDetails(postId);
+        System.out.println(list.toString());
+        return postCommentRepository.findAllPostCommentsWithAccountDetails(postId);
 
     }
 }

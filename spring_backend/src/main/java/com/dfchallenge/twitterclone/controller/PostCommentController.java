@@ -62,7 +62,7 @@ public class PostCommentController {
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "successfully saved post"));
     }
 
-    @GetMapping("/get-comments/{postId}")
+    @GetMapping("/peep-comments/{postId}")
     public ResponseEntity<?> getComments(@PathVariable Integer postId){
         return ResponseEntity.status(HttpStatus.OK).body(postCommentService.getPostComments(postId));
     }

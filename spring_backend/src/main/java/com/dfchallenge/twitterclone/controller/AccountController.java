@@ -44,8 +44,9 @@ public class AccountController {
 
     }
 
-    @PostMapping("/create-account")
+    @PostMapping("/sign-up")
     public ResponseEntity<?> createUser(@RequestBody Account account, HttpServletResponse response) {
+        System.out.println("Called signup");
         try {
             System.out.println(account.toString());
             Account newAccount;
@@ -75,6 +76,7 @@ public class AccountController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> body, HttpServletResponse response) {
+        System.out.println("Called login");
         String email = body.get("email");
         String password = body.get("password");
 
@@ -105,6 +107,7 @@ public class AccountController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {
+        System.out.println("Print logout");
         Cookie cookie = new Cookie("token", "");
 
         cookie.setMaxAge(0);
@@ -116,6 +119,7 @@ public class AccountController {
 
     @GetMapping("/validate-jwt")
     public ResponseEntity<?> validateJWT(HttpServletResponse response) {
+        System.out.println("Called Validate jwt");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
@@ -142,6 +146,7 @@ public class AccountController {
 
     @PostMapping("/authenticate-user")
     public ResponseEntity<?> validateUser(@RequestBody Map<String, String> body, HttpServletResponse response) {
+        System.out.println("Called authenticate user");
         try {
             String token = body.get("token");
             int accountId = Integer.parseInt(body.get("accountId"));

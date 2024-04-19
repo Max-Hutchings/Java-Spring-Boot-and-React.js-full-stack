@@ -2,6 +2,8 @@ package com.dfchallenge.twitterclone.entity.post;
 
 import jakarta.persistence.*;
 
+import java.util.Date;
+
 @Entity
 @Table(name="post")
 public class Post {
@@ -17,10 +19,22 @@ public class Post {
     @Column(name="account_id", nullable = false)
     private int accountId;
 
+    @Column(name="created_date", nullable = false)
+    private Date createdDate;
+
 
     public Post(String postContent, int accountId){
         this.postContent = postContent;
         this.accountId = accountId;
+        this.createdDate = new Date();
+    }
+
+    public Date getCreatedDate(){
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate){
+        this.createdDate = createdDate;
     }
 
     public Post(){}

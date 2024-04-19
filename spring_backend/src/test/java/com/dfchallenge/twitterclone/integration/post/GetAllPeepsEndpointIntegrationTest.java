@@ -46,7 +46,7 @@ public class GetAllPeepsEndpointIntegrationTest {
         this.dataGenerator = dataGenerator;
     }
 
-    private String ENDPOINT_URL = "/post/get-all-peeps";
+    private String ENDPOINT_URL = "/post/all-peeps";
 
     private Account account;
 

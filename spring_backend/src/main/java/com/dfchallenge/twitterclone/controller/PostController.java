@@ -36,6 +36,7 @@ public class PostController {
 
     @PostMapping("/add-peep")
     public ResponseEntity<?> addPost(@RequestBody Map<String, String> body) {
+        System.out.println("Called add peep");
         Post post;
         Account account = null;
 
@@ -65,8 +66,9 @@ public class PostController {
     }
 
 
-    @GetMapping("/get-all-peeps")
+    @GetMapping("/all-peeps")
     public ResponseEntity<?> getAllPosts() {
+        System.out.println("Called all peeps");
         try {
             return ResponseEntity.status(HttpStatus.OK).body(postService.getAllPosts());
         }catch (Exception e){
