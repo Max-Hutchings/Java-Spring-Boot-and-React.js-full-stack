@@ -54,6 +54,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 throw new NoJWTException();
             }
 
+
             accountId = jwtServices.extractAccountId(jwt);
             if (accountId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 

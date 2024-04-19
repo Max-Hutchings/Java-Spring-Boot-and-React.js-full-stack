@@ -5,13 +5,13 @@ import callAddPeep from "../../src/services/apis/PostPeepEndpoint.jsx";
 describe('callAddPeep', () => {
     it('posts peep and returns response', async () => {
         const mock = new MockAdapter(axios);
-        const data = { textContent: 'test peep' };
+        const requestPayload = { postContent: 'test peep' };
         const response = { data: 'Peep added' };
 
-        mock.onPost('http://localhost:4000/peep/add-peep', data).reply(200, response);
+        mock.onPost('http://localhost:4000/post/add-peep', requestPayload).reply(200, response);
 
-        const result = await callAddPeep(data);
+        const dataToSend = { textContent: 'test peep' };
+        const result = await callAddPeep(dataToSend);
         expect(result.data).toEqual(response);
     });
-
 });

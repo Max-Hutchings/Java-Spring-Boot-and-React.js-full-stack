@@ -12,7 +12,7 @@ export default function CommentsSection({peepId, addedComment}){
         const fetchComments = async () => {
             try {
                 const responseData = await callGetComments({ peepId });
-                const sortedComments = responseData.data.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+                const sortedComments = responseData.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
                 setComments(sortedComments);
                 setLoading(false);
             } catch (error) {
@@ -27,7 +27,7 @@ export default function CommentsSection({peepId, addedComment}){
         <div role={"comment-section"}>
             {!loading && comments.length > 0 ? (
                 comments.map((comment) => (
-                    <PeepComment key={comment._id} commentId={comment._id} commentUser={comment.accountId.username} commentText={comment.commentText}/>
+                    <PeepComment key={comment.id} commentId={comment.id} commentUser={comment.accountUsername} commentText={comment.commentContent}/>
                 ))
             ) : (
                 <div>

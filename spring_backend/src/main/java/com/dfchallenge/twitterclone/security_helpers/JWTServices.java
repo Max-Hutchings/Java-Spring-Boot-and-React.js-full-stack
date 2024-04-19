@@ -66,6 +66,9 @@ public class JWTServices {
     }
 
     public boolean isTokenValid(String token, Integer accountId){
+        System.out.println("========== JWT ==========");
+        System.out.println(token);
+        System.out.println("=========================");
         final Integer idFromToken = extractAccountId(token);
         return (accountId.equals(idFromToken) && !isTokenExpired(token));
     }

@@ -4,7 +4,7 @@ import axios from "axios";
 export default async function callGetComments({peepId}){
     try{
         const response = await axios.get(
-            `http://localhost:4000/peep-comment/${peepId}`,
+            `http://localhost:4000/post-comment/peep-comments/${peepId}`,
             {
                 withCredentials: true
             }

@@ -10,7 +10,7 @@ describe('callGetAllPeeps', () => {
             peeps: [{ id: 1, name: 'Jimmy' }] // Example response data
         };
 
-        mock.onGet("http://localhost:4000/peep/all-peeps").reply(200, data);
+        mock.onGet("http://localhost:4000/post/all-peeps").reply(200, data);
 
         await expect(callGetAllPeeps()).resolves.toEqual(data);
     });
