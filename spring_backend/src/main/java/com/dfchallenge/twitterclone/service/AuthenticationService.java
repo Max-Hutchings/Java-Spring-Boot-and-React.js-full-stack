@@ -26,9 +26,7 @@ public class AuthenticationService {
     }
 
     public void matchIds(int accountId, Integer accountIdFromToken) {
-        System.out.println("Called match ids");
         if (!Integer.valueOf(accountId).equals(accountIdFromToken)) {
-            System.out.println("Ids do not match");
             throw new InvalidUserException("Account id does not match token id");
         }
     }

@@ -146,8 +146,7 @@ public class AccountController {
 
             Integer accountIdFromToken = jwtServices.extractAccountId(token);
             authenticationService.matchIds(accountId, accountIdFromToken);
-            System.out.println(accountId);
-            System.out.println(accountIdFromToken);
+
 
             Map<String, ?> responseMessage = Map.of("accountValidated", true, "accountId", accountIdFromToken);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessage);

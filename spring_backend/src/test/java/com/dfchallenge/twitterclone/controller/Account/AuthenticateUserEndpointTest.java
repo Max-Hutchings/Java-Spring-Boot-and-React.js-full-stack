@@ -58,7 +58,6 @@ public class AuthenticateUserEndpointTest {
     """;
 
         when(jwtServices.extractAccountId("valid_jwt_token")).thenReturn(1);
-
         mockMvc.perform(post(ENDPOINT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
@@ -77,7 +76,6 @@ public class AuthenticateUserEndpointTest {
     """;
 
         when(jwtServices.extractAccountId("valid_jwt_token")).thenReturn(1);
-
         mockMvc.perform(post(ENDPOINT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
@@ -95,7 +93,6 @@ public class AuthenticateUserEndpointTest {
     """;
 
         when(jwtServices.extractAccountId("valid_jwt_token")).thenReturn(1);
-
         mockMvc.perform(post(ENDPOINT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
