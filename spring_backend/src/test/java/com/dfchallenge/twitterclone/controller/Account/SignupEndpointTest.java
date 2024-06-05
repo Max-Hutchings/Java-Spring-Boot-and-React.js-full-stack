@@ -6,6 +6,7 @@ import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.service.AccountService;
+import com.dfchallenge.twitterclone.service.AuthenticationService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ public class SignupEndpointTest {
 
     @MockBean
     private CookieAdder cookieAdder;
+
+    @MockBean
+    private AuthenticationService authenticationService;
 
 
     @MockBean

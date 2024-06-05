@@ -5,8 +5,11 @@ import com.dfchallenge.twitterclone.exceptions.InvalidUserException;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.service.AccountService;
+import com.dfchallenge.twitterclone.service.AuthenticationService;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -31,6 +34,9 @@ public class AuthenticateUserEndpointTest {
 
     @MockBean
     private AccountService accountService;
+
+    @MockBean
+    private AuthenticationService authenticationService;
 
     @MockBean
     private JWTServices jwtServices;
@@ -108,6 +114,9 @@ public class AuthenticateUserEndpointTest {
     """;
 
         when(jwtServices.extractAccountId("valid_jwt_token")).thenReturn(1);
+        doThrow(new InvalidUserException("Account id does not match token id"))
+                .when(authenticationService).matchIds(2, 1);
+
         mockMvc.perform(post(ENDPOINT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))

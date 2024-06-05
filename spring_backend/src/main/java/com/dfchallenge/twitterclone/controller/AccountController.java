@@ -8,6 +8,7 @@ import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.service.AccountService;
+import com.dfchallenge.twitterclone.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +35,16 @@ public class AccountController {
     private final AccountService accountService;
     private final JWTServices jwtServices;
     private final CookieAdder cookieAdder;
+    private final AuthenticationService authenticationService;
 
 
     @Autowired
-    public AccountController(AccountService accountService, JWTServices jwtServices, CookieAdder cookieAdder) {
+    public AccountController(AccountService accountService, JWTServices jwtServices, CookieAdder cookieAdder,
+                             AuthenticationService authenticationService) {
         this.accountService = accountService;
         this.jwtServices = jwtServices;
         this.cookieAdder = cookieAdder;
+        this.authenticationService = authenticationService;
 
     }
 
@@ -116,47 +120,44 @@ public class AccountController {
 
     @GetMapping("/validate-jwt")
     public ResponseEntity<?> validateJWT(HttpServletResponse response) {
-        System.out.println("Called Validate jwt");
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Object principal = authentication.getPrincipal();
+        logger.info("Called Validate jwt");
 
-            if (principal instanceof Account) {
-                Account account = (Account) principal;
+        try{
+            Account account = authenticationService.getAuthenticatedAccount();
 
-                String newJwt = jwtServices.generateToken(account.getId());
-                cookieAdder.addTokenToCookie(newJwt, response);
+            String newJwt = jwtServices.generateToken(account.getId());
+            cookieAdder.addTokenToCookie(newJwt, response);
 
-                AccountDTO accountDTO = new AccountDTO(account);
+            AccountDTO accountDTO = new AccountDTO(account);
 
-
-                return ResponseEntity.status(HttpStatus.OK).body(accountDTO);
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("An error occurred while fetching account details.");
-            }
-
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+            return ResponseEntity.status(HttpStatus.OK).body(accountDTO);
+        } catch (AuthenticationException | InvalidAuthenticationPrincipalException e) {
+            return buildErrorResponse(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
         }
     }
 
+
     @PostMapping("/authenticate-user")
-    public ResponseEntity<?> validateUser(@RequestBody Map<String, String> body, HttpServletResponse response) {
-        System.out.println("Called authenticate user");
+    public ResponseEntity<?> validateUser(@RequestBody Map<String, String> body) {
+        logger.info("Called authenticate user");
         try {
             String token = body.get("token");
             int accountId = Integer.parseInt(body.get("accountId"));
+
             Integer accountIdFromToken = jwtServices.extractAccountId(token);
-            if (accountIdFromToken == accountId) {
-                Map<String, ?> responseMessage = Map.of("accountValidated", true, "accountId", accountIdFromToken);
-                return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
-            }
-            throw new InvalidUserException("Account id does not match token id");
-        } catch (Exception e) {
-            Map<String, ?> responseMessage = Map.of("accountValidated", false, "errors", e.getMessage());
+            authenticationService.matchIds(accountId, accountIdFromToken);
+            System.out.println(accountId);
+            System.out.println(accountIdFromToken);
+
+            Map<String, ?> responseMessage = Map.of("accountValidated", true, "accountId", accountIdFromToken);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+
+
+        }catch(InvalidUserException invalidUserException){
+            Map<String, ?> responseMessage = Map.of("accountValidated", false, "errors", invalidUserException.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMessage);
         }
+
     }
 
 }

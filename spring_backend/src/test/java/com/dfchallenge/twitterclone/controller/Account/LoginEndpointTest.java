@@ -9,6 +9,7 @@ import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.service.AccountService;
+import com.dfchallenge.twitterclone.service.AuthenticationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class LoginEndpointTest {
 
     @MockBean
     private PostController postController;
+
+    @MockBean
+    private AuthenticationService authenticationService;
 
     @MockBean
     private PostCommentController postCommentController;
