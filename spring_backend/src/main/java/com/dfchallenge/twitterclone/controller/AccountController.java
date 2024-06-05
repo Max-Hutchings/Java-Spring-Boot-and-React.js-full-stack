@@ -3,25 +3,22 @@ package com.dfchallenge.twitterclone.controller;
 
 import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.entity.account.AccountDTO;
-import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
-import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
-import com.dfchallenge.twitterclone.exceptions.InvalidUserException;
+import com.dfchallenge.twitterclone.exceptions.*;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.service.AccountService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.coyote.Response;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.Cookie;
+import org.slf4j.Logger;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +27,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/authentication")
 public class AccountController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
+
 
     private final AccountService accountService;
     private final JWTServices jwtServices;
@@ -44,66 +44,63 @@ public class AccountController {
 
     }
 
+    private ResponseEntity<Map<String, String>> buildErrorResponse(HttpStatus status, String message, Exception e) {
+        logger.error(message, e);
+        Map<String, String> bodyMessage = Map.of("message", message, "errors", e.getMessage());
+        return ResponseEntity.status(status).body(bodyMessage);
+    }
+
     @PostMapping("/sign-up")
     public ResponseEntity<?> createUser(@RequestBody Account account, HttpServletResponse response) {
-        System.out.println("Called signup");
-        try {
-            System.out.println(account.toString());
-            Account newAccount;
-            try {
-                newAccount = accountService.saveAccount(account);
-            } catch (InvalidAccountInputException e) {
-                Map<String, String> bodyMessage = Map.of("message", "Failed to save account due to input", "errors", e.getMessage());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bodyMessage);
-            } catch (AccountAlreadyExistsException e) {
-                Map<String, String> bodyMessage = Map.of("message", "Account Already Exists", "errors", e.getMessage());
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(bodyMessage);
-            }
+        logger.info("Called signup");
+        try{
+            logger.debug("Account details: {}", account.toString());
 
+            Account newAccount = accountService.saveAccount(account);
             String jwtToken = jwtServices.generateToken(newAccount.getId());
             cookieAdder.addTokenToCookie(jwtToken, response);
 
             AccountDTO accountDTO = new AccountDTO(newAccount);
-            System.out.println(accountDTO.toString());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(accountDTO);
+
+        }
+        catch (InvalidAccountInputException e) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, "Failed to save account due to input", e);
+        } catch (AccountAlreadyExistsException e) {
+            return buildErrorResponse(HttpStatus.CONFLICT, "Account Already Exists", e);
         } catch (Exception e) {
-            Map<String, String> bodyMessage = Map.of("message", "Failed to save account", "errors", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bodyMessage);
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save account", e);
         }
 
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> body, HttpServletResponse response) {
-        System.out.println("Called login");
-        String email = body.get("email");
-        String password = body.get("password");
+        logger.info("Called login");
 
-        Optional<Account> optionalAccount = accountService.getAccountByEmail(email);
+        try {
+            Account account = accountService.getAccountByEmail(body.get("email"));
+            PasswordHasher.checkPassword(body.get("password"), account.getPassword());
 
-        if (!optionalAccount.isPresent()) {
-            Map<String, String> responseBody = Map.of("message", "Failed to find account");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
+            String jwtToken = jwtServices.generateToken(account.getId());
+            cookieAdder.addTokenToCookie(jwtToken, response);
+
+            AccountDTO accountDTO = new AccountDTO(account);
+
+            return ResponseEntity.status(HttpStatus.OK).body(accountDTO);
+
+        } catch (FailedToGetAccountException failedToGetAccountException) {
+            System.out.println(failedToGetAccountException.getMessage());
+            return buildErrorResponse(HttpStatus.NOT_FOUND, "Failed to find account", failedToGetAccountException);
+        } catch (PasswordDoesntMatchException passwordDoesntMatchException) {
+            return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Incorrect password", passwordDoesntMatchException);
         }
-
-        Account account = optionalAccount.get();
-
-        boolean passwordsMatch = PasswordHasher.checkPassword(password, account.getPassword());
-        if (!passwordsMatch) {
-            Map<String, String> responseBody = Map.of("message", "Incorrect password");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
-        }
-
-        String jwtToken = jwtServices.generateToken(account.getId());
-        cookieAdder.addTokenToCookie(jwtToken, response);
-
-        AccountDTO accountDTO = new AccountDTO(account);
-
-        return ResponseEntity.status(HttpStatus.OK).body(accountDTO);
-
-
     }
+
+
+
+
 
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {

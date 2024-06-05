@@ -1,6 +1,6 @@
 package com.dfchallenge.twitterclone.security_helpers;
 
-import org.springframework.context.annotation.Bean;
+import com.dfchallenge.twitterclone.exceptions.PasswordDoesntMatchException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class PasswordHasher {
@@ -13,7 +13,8 @@ public class PasswordHasher {
     }
 
 
-    public static boolean checkPassword(String plainPassword, String hashedPassword){
-        return encoder.matches(plainPassword, hashedPassword);
+    public static void checkPassword(String plainPassword, String hashedPassword){
+        if (encoder.matches(plainPassword, hashedPassword)) return;
+        throw new PasswordDoesntMatchException();
     }
 }

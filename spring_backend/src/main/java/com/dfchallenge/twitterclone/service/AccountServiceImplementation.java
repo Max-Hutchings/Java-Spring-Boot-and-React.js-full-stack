@@ -3,6 +3,7 @@ package com.dfchallenge.twitterclone.service;
 import com.dfchallenge.twitterclone.dao.AccountRepository;
 import com.dfchallenge.twitterclone.entity.account.Account;
 import com.dfchallenge.twitterclone.exceptions.AccountAlreadyExistsException;
+import com.dfchallenge.twitterclone.exceptions.FailedToGetAccountException;
 import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
 import com.dfchallenge.twitterclone.validators.AccountValidators;
@@ -55,9 +56,11 @@ public class AccountServiceImplementation implements AccountService{
     }
 
 
-    public Optional<Account> getAccountByEmail(String email){
-        return accountRepository.findByEmail(email);
+    public Account getAccountByEmail(String email) {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(FailedToGetAccountException::new);
     }
+
 
 
 

@@ -10,5 +10,5 @@ public interface AccountService {
     Account saveAccount(Account account);
     Optional<Account> getAccountById(Integer id);
 
-    Optional<Account> getAccountByEmail(String email);
+    Account getAccountByEmail(String email);
 }

@@ -3,6 +3,8 @@ package com.dfchallenge.twitterclone.controller.Account;
 import com.dfchallenge.twitterclone.controller.PostCommentController;
 import com.dfchallenge.twitterclone.controller.PostController;
 import com.dfchallenge.twitterclone.entity.account.Account;
+import com.dfchallenge.twitterclone.exceptions.FailedToGetAccountException;
+import com.dfchallenge.twitterclone.exceptions.PasswordDoesntMatchException;
 import com.dfchallenge.twitterclone.security_helpers.CookieAdder;
 import com.dfchallenge.twitterclone.security_helpers.JWTServices;
 import com.dfchallenge.twitterclone.security_helpers.PasswordHasher;
@@ -60,7 +62,7 @@ public class LoginEndpointTest {
             }
         """;
 
-        when(accountService.getAccountByEmail("jason@gmail.com")).thenReturn(Optional.of(mockAccount));
+        when(accountService.getAccountByEmail("jason@gmail.com")).thenReturn(mockAccount);
         when(jwtServices.generateToken(mockAccount.getId())).thenReturn("jwt_token");
 
         mockMvc.perform(post(ENDPOINT_URL)
@@ -79,7 +81,8 @@ public class LoginEndpointTest {
             }
         """;
 
-        when(accountService.getAccountByEmail("unknown@gmail.com")).thenReturn(Optional.empty());
+        when(accountService.getAccountByEmail("unknown@gmail.com"))
+                .thenThrow(new FailedToGetAccountException());
 
         mockMvc.perform(post(ENDPOINT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +101,7 @@ public class LoginEndpointTest {
             }
         """;
 
-        when(accountService.getAccountByEmail("jason@gmail.com")).thenReturn(Optional.of(mockAccount));
+        when(accountService.getAccountByEmail("jason@gmail.com")).thenThrow(new PasswordDoesntMatchException());
 
         mockMvc.perform(post(ENDPOINT_URL)
                         .contentType(MediaType.APPLICATION_JSON)

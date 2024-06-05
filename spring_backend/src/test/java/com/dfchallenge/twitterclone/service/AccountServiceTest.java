@@ -6,6 +6,7 @@ import com.dfchallenge.twitterclone.entity.account.Account;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.dfchallenge.twitterclone.entity.account.Role;
+import com.dfchallenge.twitterclone.exceptions.FailedToGetAccountException;
 import com.dfchallenge.twitterclone.exceptions.InvalidAccountInputException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -150,10 +151,9 @@ public class AccountServiceTest {
                 "ValidPassword1!", "USER");
         when(accountRepository.findByEmail("example@example.com")).thenReturn(Optional.of(mockAccount));
 
-        Optional<Account> found = accountService.getAccountByEmail("example@example.com");
+        Account found = accountService.getAccountByEmail("example@example.com");
 
-        assertTrue(found.isPresent());
-        assertEquals(mockAccount, found.get());
+        assertEquals(mockAccount, found);
     }
 
     @Test
@@ -163,10 +163,10 @@ public class AccountServiceTest {
                 "ValidPassword1!", "USER");
         when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
 
-        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
 
-        assertTrue(found.isPresent());
-        assertEquals("validUsername", found.get().getUsername());
+        Account found = accountService.getAccountByEmail("validEmail@example.com");
+
+        assertEquals("validUsername", found.getUsername());
     }
 
     @Test
@@ -176,10 +176,9 @@ public class AccountServiceTest {
                 "ValidPassword1!", "USER");
         when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
 
-        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+        Account found = accountService.getAccountByEmail("validEmail@example.com");
 
-        assertTrue(found.isPresent());
-        assertEquals("FirstName", found.get().getFName());
+        assertEquals("FirstName", found.getFName());
     }
 
 
@@ -190,10 +189,9 @@ public class AccountServiceTest {
                 "ValidPassword1!", "USER");
         when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
 
-        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+        Account found = accountService.getAccountByEmail("validEmail@example.com");
 
-        assertTrue(found.isPresent());
-        assertEquals("LastName", found.get().getLName());
+        assertEquals("LastName", found.getLName());
     }
 
     @Test
@@ -203,10 +201,9 @@ public class AccountServiceTest {
                 "ValidPassword1!", "USER");
         when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
 
-        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+        Account found = accountService.getAccountByEmail("validEmail@example.com");
 
-        assertTrue(found.isPresent());
-        assertEquals("validEmail@example.com", found.get().getEmail());
+        assertEquals("validEmail@example.com", found.getEmail());
     }
 
     @Test
@@ -216,10 +213,9 @@ public class AccountServiceTest {
                 "ValidPassword1!", "USER");
         when(accountRepository.findByEmail("validEmail@example.com")).thenReturn(Optional.of(mockAccount));
 
-        Optional<Account> found = accountService.getAccountByEmail("validEmail@example.com");
+        Account found = accountService.getAccountByEmail("validEmail@example.com");
 
-        assertTrue(found.isPresent());
-        assertEquals(Role.USER, found.get().getRole());
+        assertEquals(Role.USER, found.getRole());
     }
 
 
@@ -229,9 +225,10 @@ public class AccountServiceTest {
     public void whenAccountByEmailNotFound_thenNull() {
         when(accountRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        Optional<Account> found = accountService.getAccountByEmail("example@example.com");
+        assertThrows(FailedToGetAccountException.class, () -> {
+            accountService.getAccountByEmail("example@example.com");
+        });
 
-        assertFalse(found.isPresent());
 
     }
 
